@@ -2,3 +2,4 @@
 .envs/
 deploy/
 uwsgi_params
+locale/
