@@ -1,0 +1,4 @@
+.env
+.envs/
+deploy/
+uwsgi_params

@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block head_title %}{{ question.header }}{% endblock %}
+
+{% block content %}
+            <div class="row py-4">
+                <h3>{{ question.header }}</h3>
+                <hr/>
+            </div>
+            <div class="row py-2">
+            <div class="col-md-1 text-center" id="q_{{ question.pk }}">
+                <button class="up btn btn-outline-info {% if question.voted_by_user > 0 %}active{% endif %}" data-id="{{ question.pk }}" {% if not user.is_authenticated or question.voted_by_user < 0 %} disabled{% endif %}>
+                    <i class="bi bi-chevron-up"></i>
+                </button>
+                <div class="w-100"></div>
+                <h1 class="text-center">{{ question.total_score }}</h1>
+                <div class="w-100"></div>
+                <button class="btn btn-outline-info down {% if question.voted_by_user < 0 %}active{% endif %}" data-id="{{ question.pk }}" {% if not user.is_authenticated or question.voted_by_user > 0 %} disabled {% endif %}>
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+            </div>
+            <div class="col-md-11">
+                {{ question.body }}
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 offset-md-1">
+                {% for tag in question.tags.all %}
+                    <a href="{% url 'qa:search' %}?q=tag:{{ tag.word }}"><span class="badge badge-info">{{ tag.word }}</span></a>
+                {% endfor %}
+            </div>
+            <div class="col-md-3 offset-md-5">
+                <small>asked {{ question.date_created }}</small>
+                    <div class="row">
+                        <div class="col-2"><img width="32" height="32" src="{{ question.author.avatar.url }}"/></div>
+                        <div class="col-2"><small>{{ question.author.username }}</small></div>
+                    </div>
+            </div>
+        </div>
+    <hr/>
+
+    {% for answer in object_list %}
+        <div class="row py-2">
+            <div class="col-md-1 text-center" id="ans_{{ answer.pk }}">
+                <button class="up btn btn-outline-info ans {% if answer.voted_by_user > 0 %}active{% endif %}" data-id="{{ answer.pk }}" {% if not user.is_authenticated or answer.voted_by_user < 0 %} disabled{% endif %}>
+                    <i class="bi bi-chevron-up"></i>
+                </button>
+                <div class="w-100"></div>
+                <h1 class="text-center">{{ answer.total_score }}</h1>
+                <div class="w-100"></div>
+                <button class="btn btn-outline-info down ans {% if answer.voted_by_user < 0 %}active{% endif %}" data-id="{{ answer.pk }}" {% if not user.is_authenticated or answer.voted_by_user > 0 %} disabled {% endif %}>
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+
+                {% if question.author.pk == user.pk or answer.is_accepted %}
+                <button class="btn btn-outline-success accept {% if answer.is_accepted %}active{% endif %}" data-id="{{ answer.pk }}" {% if not user.is_authenticated or question.author.pk != user.pk %} disabled{% endif %}>
+                    <i class="bi bi-check-lg"></i>
+                </button>
+                {% endif %}
+            </div>
+            <div class="col-md-11">
+                {{ answer.body }}
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 offset-md-9">
+                <small>answered {{ answer.date_created }}</small>
+                    <div class="row">
+                        <div class="col-2"><img width="32" height="32" src="{{ answer.author.avatar.url }}"/></div>
+                        <div class="col-2"><small>{{ answer.author.username }}</small></div>
+                    </div>
+            </div>
+        </div>
+        <hr/>
+    {% endfor %}
+
+    {% if user.is_authenticated %}
+    <form method="post">
+    {% csrf_token %}
+    {{ form|crispy }}
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </form>
+    {% endif %}
+
+    <form id="vote" method="post">
+        {% csrf_token %}
+        <input type="hidden" id="pk" name="pk"/>
+        <input type="hidden" id="user" name="user" value="{{ user.pk }}"/>
+        <input type="hidden" id="val" name="val" value="1" />
+        <input type="hidden" id="is_answ" name="is_answ" value="1" />
+        <input type="hidden" id="unvote" name="unvote" value="false" />
+    </form>
+    <form id="accept" method="post">
+        {% csrf_token %}
+        <input type="hidden" id="accept_pk" name="pk"/>
+        <input type="hidden" id="is_accept" name="is_accept"/>
+    </form>
+
+{% endblock %}
+
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+{% endblock %}
+
+{% block inline_javascript %}
+<script>
+$(document).ready(function(){
+
+    function vote(pk, is_answ, val, is_unvote, formData)
+    {
+        $.ajax({
+            type: "POST",
+            url: {% url  'qa:vote' %},
+            data: formData,
+            success: function(r) {
+                //alert($(this).val('is_answ'));
+                if (is_answ==1){
+                    parent_div = $("#ans_"+pk);
+                }
+                else {
+                    parent_div = $("#q_"+pk);
+                }
+                parent_div.children('h1').html(r.rating);
+
+                //alert(is_unvote);
+                if (is_unvote === 'true')
+                {
+                    //alert('unvote');
+                    if (val > 0) {
+                           parent_div.children('button.up').removeClass('active');
+                           parent_div.children('button.down').attr('disabled',false);
+                    }
+                    else {
+                        parent_div.children('button.down').removeClass('active');
+                        parent_div.children('button.up').attr('disabled',false);
+                    }
+                }
+                else
+                {
+                    if (val > 0) {
+                        parent_div.children('button.up').addClass('active');//.removeClass('btn-outline-info');
+                        parent_div.children('button.down').attr('disabled',true);
+
+                    }
+                    else {
+                        parent_div.children('button.down').addClass('active');//.removeClass('btn-outline-info');
+                        parent_div.children('button.up').attr('disabled',true);
+                     }
+                }
+                }
+        });
+    }
+
+    $("#vote").submit(function(event) {
+        event.preventDefault();
+        formData = $(this).serialize();
+        vote($('#pk').val(),$('#is_answ').val(),$('#val').val(),$('#unvote').val(),formData);
+    });
+
+
+    $('.up').click(function(){
+        $('#unvote').val($(this).hasClass('active'));
+
+        $('#val').val(1);
+        $('#pk').val($(this).data('id'));
+        $('#is_answ').val($(this).hasClass('ans') ? 1 : 0);
+        $("#vote").submit();
+    });
+
+    $('.down').click(function(){
+        $('#unvote').val($(this).hasClass('active'));
+        $('#val').val(-1);
+        $('#pk').val($(this).data('id'));
+        $('#is_answ').val($(this).hasClass('ans') ? 1 : 0);
+        $("#vote").submit();
+    });
+
+    $("#accept").submit(function(event) {
+        event.preventDefault();
+        formData = $(this).serialize();
+        $.ajax({
+            type: "POST",
+            url: {% url  'qa:accept' %},
+            data: formData,
+            success: function(r) {
+                if (r.success)
+                    {
+                        $('button.accept').removeClass('active');
+                        accept_btn = $("#ans_"+$("#accept_pk").val()).children('button.accept');
+                        if ($('#is_accept').val()>0)
+                            accept_btn.addClass('active');
+
+                        }
+            }
+            });
+    });
+
+    $('.accept').click(function(){
+
+        $('#accept_pk').val($(this).data('id'));
+        $('#is_accept').val($(this).hasClass('active') ? 0 : 1);
+        $("#accept").submit();
+    });
+});
+</script>
+{% endblock inline_javascript %}

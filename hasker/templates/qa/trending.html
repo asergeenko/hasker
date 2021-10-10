@@ -1,0 +1,11 @@
+<ul class="nav flex-column">
+{% for question in trending %}
+    <li class="nav-item">
+        <div class="row">
+            <div class="col-md-3"><span class="badge badge-{% if question.is_accepted %}success{% else %}secondary{% endif %}" style="width:50px;">{{ question.total_score }}</span></div>
+            <div class="col-md-9"><a href="{% url 'qa:question' question.pk %}"><small>{{ question.header }}</small></a></div>
+
+        </div>
+    </li>
+{% endfor %}
+</ul>
