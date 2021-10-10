@@ -2,7 +2,7 @@
 ## Poor man's stackoverflow
 
 ## Детали реализации
-Каркас Django-приложения создан с помощью [cookiecutter](https://github.com/pydanny/cookiecutter-django) (с удалёнными впоследствии добавками вроде allauth по условию задания).
+Каркас Django-приложения создан с помощью [cookiecutter](https://github.com/pydanny/cookiecutter-django) (с удалёнными добавками вроде allauth по условию задания).
 В качестве UI библиотеки используются [Bootstrap 4](https://getbootstrap.com/), для добавления тэгов [Slim Select](https://slimselectjs.com/) и [Crispy Forms](https://django-crispy-forms.readthedocs.io/) для красивой отрисовки форм.
 
 ## Тестирование
