@@ -12,7 +12,6 @@ from hasker.users.forms import UserChangeForm
 from hasker.users.models import User
 from hasker.users.tests.factories import UserFactory
 from hasker.users.views import (
-    UserRedirectView,
     UserUpdateView,
     user_detail_view,
 )
@@ -68,17 +67,6 @@ class TestUserUpdateView:
 
         messages_sent = [m.message for m in messages.get_messages(request)]
         assert messages_sent == ["Information successfully updated"]
-
-
-class TestUserRedirectView:
-    def test_get_redirect_url(self, user: User, rf: RequestFactory):
-        view = UserRedirectView()
-        request = rf.get("/fake-url")
-        request.user = user
-
-        view.request = request
-
-        assert view.get_redirect_url() == f"/users/{user.username}/"
 
 
 class TestUserDetailView:

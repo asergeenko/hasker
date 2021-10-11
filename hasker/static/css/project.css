@@ -18,5 +18,11 @@
 
 .accept{
     outline:none; border-style: none;
+    visibility: hidden;
 }
-
+div.answer:hover .accept{
+    visibility: visible;
+}
+.accept.active{
+    visibility: visible;
+}

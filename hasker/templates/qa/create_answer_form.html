@@ -45,7 +45,7 @@
     <hr/>
 
     {% for answer in object_list %}
-        <div class="row py-2">
+        <div class="row py-2 answer">
             <div class="col-md-1 text-center" id="ans_{{ answer.pk }}">
                 <button class="up btn btn-outline-info ans {% if answer.voted_by_user > 0 %}active{% endif %}" data-id="{{ answer.pk }}" {% if not user.is_authenticated or answer.voted_by_user < 0 %} disabled{% endif %}>
                     <i class="bi bi-chevron-up"></i>
