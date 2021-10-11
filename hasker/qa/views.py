@@ -1,32 +1,25 @@
 import json
-
 import logging
 from smtplib import SMTPException
 
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
-
-
-from django.shortcuts import render
-from hasker.qa.models import Question,Answer,VoteAnswer,VoteQuestion,vote, accept_answer, get_questions_with_stats
 from django.views.generic import ListView, View, CreateView
 from django.views.generic.edit import FormMixin
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import Q, Sum, F, Count, Case, When, BooleanField, Exists,Max, OuterRef
+from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404
-
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
 from django.core.mail import send_mail
-
 from django.http import JsonResponse
-
 from django.db.models.functions import Coalesce
 
 from hasker.qa.forms import QuestionForm,AnswerForm
+from hasker.qa.models import Question,Answer,VoteAnswer,VoteQuestion,vote, accept_answer, get_questions_with_stats
+
+
+logger = logging.getLogger(__name__)
 
 
 class SearchView(ListView):
@@ -126,8 +119,6 @@ class CreateAnswerView(FormMixin, ListView, LoginRequiredMixin, SuccessMessageMi
         return reverse_lazy('qa:question',args=(self.kwargs['pk'],))
 
     def post(self, request, *args, **kwargs):
-
-       # self.object = self.get_object()
         form = self.get_form()
         if form.is_valid():
             return self.form_valid(form)
@@ -139,7 +130,7 @@ class VoteView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         if self.request.is_ajax():
-            # Добавить проверки полей
+
             pk = self.request.POST.get('pk')
             params = {}
             params['post_id'] = pk
@@ -157,11 +148,9 @@ class AcceptAnswerView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         if self.request.is_ajax():
-            # Добавить проверки полей
+
             pk = self.request.POST.get('pk')
             is_accept = int(self.request.POST.get('is_accept'))
-            result = True
-            accepted = False
 
             result = accept_answer(pk, is_accept)
 
@@ -176,7 +165,6 @@ class TopQuestionsView(ListView):
     def get(self, request, *args, **kwargs):
 
         self.results = get_questions_with_stats(Question.objects)
-                            #.order_by('-total_score')[:5]
 
         hot = int(request.GET.get('hot', 0))
 
@@ -186,8 +174,6 @@ class TopQuestionsView(ListView):
             self.results = self.results.order_by('-date_created')
 
         self.hot = hot
-
-
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):

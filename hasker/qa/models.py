@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
-
 from django.db.models import Sum,Exists,Count, OuterRef
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
@@ -14,9 +13,6 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.word
-
-    #class Meta:
-    #    app_label = 'hasker.qa'
 
 
 class AbstractPost(models.Model):
@@ -97,7 +93,7 @@ def accept_answer(pk, is_accept):
         answer.save()
 
         if is_accept:
-            other_answers = Answer.objects.filter(question=answer.question, is_accepted=True).exclude(pk=answer.pk).update(is_accepted=True)
+            Answer.objects.filter(question=answer.question, is_accepted=True).exclude(pk=answer.pk).update(is_accepted=True)
     except:
         result = False
 

@@ -8,8 +8,6 @@ from rest_framework.authtoken.views import obtain_auth_token
 from hasker.users.views import AccountLogoutView, AccountLoginView,AccountSignupView,AccountResetPasswordView
 
 urlpatterns = [
-    #path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
-    #path("about/", TemplateView.as_view(template_name="pages/about.html"), name="about"),
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
@@ -18,11 +16,9 @@ urlpatterns = [
     path("accounts/logout/",AccountLogoutView.as_view(),name="account_logout"),
     path("accounts/login/",AccountLoginView.as_view(), name="account_login"),
     path("accounts/signup/",AccountSignupView.as_view(),name="account_signup"),
-    path("accounts/reset-password/",AccountResetPasswordView.as_view(),name="account_reset_password"),
 
     path("", include("hasker.qa.urls", namespace="qa")),
 
-    #path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

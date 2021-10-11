@@ -1,6 +1,3 @@
-from django.conf import settings
-print(settings.INSTALLED_APPS)
-
 from django.urls import path
 
 from hasker.qa import views

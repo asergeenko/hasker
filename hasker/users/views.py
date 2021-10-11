@@ -1,17 +1,15 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.urls import reverse, reverse_lazy
-from django.views.generic import DetailView, RedirectView, UpdateView,View
+from django.urls import reverse_lazy
+from django.views.generic import DetailView, UpdateView,View
 from django.views.generic.edit import CreateView
-from django.contrib.auth import logout,login
+from django.contrib.auth import logout
 from django.shortcuts import redirect,render
-
-
 from django.contrib.auth.views import LoginView, LogoutView
 
 from .forms import UserCreationForm
-#from django.contrib.auth.forms import UserCreationForm
+
 
 User = get_user_model()
 
@@ -42,20 +40,10 @@ class UserUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
 user_update_view = UserUpdateView.as_view()
 
 
-#class UserRedirectView(LoginRequiredMixin, RedirectView):
-
-#    permanent = False
-
-    #def get_redirect_url(self):
-    #    return reverse("users:detail", kwargs={"username": self.request.user.username})
-
-#user_redirect_view = UserRedirectView.as_view()
-
-class AccountLogoutView(LoginRequiredMixin,LogoutView):#(,View):
+class AccountLogoutView(LoginRequiredMixin,LogoutView):
     template_name = "account/logout.html"
 
     def post(self, *args, **kwargs):
-        #url = self.request.path_info#self.get_redirect_url()
         if self.request.user.is_authenticated:
             logout(self.request)
         return redirect('qa:home')
@@ -79,8 +67,5 @@ class AccountResetPasswordView(LoginRequiredMixin,View):
         return render(self.request, self.template_name)
 
     def post(self, *args, **kwargs):
-        #url = self.request.path_info  # self.get_redirect_url()
-        #if not self.request.user.is_authenticated:
-        #    login(self.request)
         return redirect('qa:home')
 
