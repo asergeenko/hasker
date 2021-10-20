@@ -3,3 +3,4 @@
 deploy/
 uwsgi_params
 locale/
+docs/
