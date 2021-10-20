@@ -1,4 +1,6 @@
 import pytest
+import json
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import AnonymousUser
@@ -9,13 +11,14 @@ from django.test import RequestFactory
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth import get_user_model
 
-#from hasker.users.forms import UserChangeForm
 from hasker.qa.models import Question
 from hasker.qa.forms import QuestionForm, AnswerForm
 from hasker.qa.tests.factories import QuestionFactory
 from hasker.qa.views import (
     AskView,
-    CreateAnswerView
+    CreateAnswerView,
+    SearchView,
+    VoteView
 )
 
 User = get_user_model()
@@ -72,3 +75,33 @@ class TestAnswerView:
         answer = form.save()
         assert answer.body == "42"
         assert answer.question.id == int(view.kwargs['pk'])
+
+class TestSearchView:
+
+    def dummy_get_response(self, request: HttpRequest):
+        return None
+
+
+    def test_valid_search(self, user: User, rf: RequestFactory):
+        request = rf.get("/search/?q=test")
+
+        response = SearchView.as_view()(request)
+        assert response.context_data['object_list'][0].body == "Test question body"
+
+
+class TestVoteView:
+
+    def dummy_get_response(self, request: HttpRequest):
+        return None
+
+
+    def test_vote(self, user: User, rf: RequestFactory):
+        view = VoteView()
+        request = rf.post("/vote/", {'is_answ':0,'pk':9,'val':1,'unvote':'false','user':user.pk}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
+        # Add the session/message middleware to the request
+        SessionMiddleware(self.dummy_get_response).process_request(request)
+        MessageMiddleware(self.dummy_get_response).process_request(request)
+        request.user = user
+        response = VoteView.as_view()(request)
+        assert json.loads(str(response.content,encoding='utf-8')) == {'success':True,'rating':1}

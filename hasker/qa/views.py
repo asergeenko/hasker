@@ -137,7 +137,6 @@ class VoteView(LoginRequiredMixin, View):
             params['value'] = self.request.POST.get('val')
             params['author_id'] = self.request.POST.get('user')
             is_unvote = json.loads(self.request.POST.get('unvote'))
-
             vote_model = VoteAnswer if int(self.request.POST.get('is_answ')) else VoteQuestion
 
             result, rating = vote(vote_model, is_unvote=is_unvote, **params)
