@@ -61,7 +61,7 @@ class AskView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     def get_success_url(self):
         return reverse_lazy('qa:question',args=(self.object.id,))
 
-class CreateAnswerView(FormMixin, ListView, LoginRequiredMixin, SuccessMessageMixin):
+class CreateAnswerView(ListView, FormMixin, LoginRequiredMixin, SuccessMessageMixin):
     template_name = 'create_answer_form.html'
     paginate_by = 30
     form_class = AnswerForm
