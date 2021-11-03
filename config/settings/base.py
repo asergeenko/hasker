@@ -58,7 +58,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 AUTH_USER_MODEL = "users.User"
 LOGIN_REDIRECT_URL = "qa:home"
-LOGIN_URL = "account_login"
+LOGIN_URL = "users:account_login"
 
 AUTH_PASSWORD_VALIDATORS = [
     {

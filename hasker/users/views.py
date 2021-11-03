@@ -15,7 +15,7 @@ User = get_user_model()
 
 
 class UserDetailView(LoginRequiredMixin, DetailView):
-
+    template_name = "user_detail.html"
     model = User
     slug_field = "username"
     slug_url_kwarg = "username"
@@ -25,7 +25,7 @@ user_detail_view = UserDetailView.as_view()
 
 
 class UserUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
-
+    template_name = "user_form.html"
     model = User
     fields = ["email","avatar"]
     success_message = "Information successfully updated"
@@ -46,7 +46,7 @@ class AccountLogoutView(LoginRequiredMixin,LogoutView):
     def post(self, *args, **kwargs):
         if self.request.user.is_authenticated:
             logout(self.request)
-        return redirect('qa:home')
+        return redirect('users:account_login')
 
 class AccountLoginView(LoginView):
     template_name = "login.html"

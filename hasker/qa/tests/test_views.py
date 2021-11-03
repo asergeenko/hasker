@@ -13,7 +13,6 @@ from django.contrib.auth import get_user_model
 
 from hasker.qa.models import Question
 from hasker.qa.forms import QuestionForm, AnswerForm
-from hasker.qa.tests.factories import QuestionFactory
 from hasker.qa.views import (
     AskView,
     CreateAnswerView,
@@ -28,58 +27,56 @@ pytestmark = pytest.mark.django_db
 class TestAskView:
     @classmethod
     def setup_class(cls):
-        cls.msg_question_added = "Your question was added successfully"
+        cls.question = {'header':'Test question header', 'body':'Test question body'}
+
 
     def dummy_get_response(self, request: HttpRequest):
         return None
 
-    def test_form_valid(self, user: User, rf: RequestFactory):
-        view = AskView()
-        request = rf.get("/fake-url/")
+    def test_ask_form(self):
+        form = QuestionForm(self.question)
+        assert form.is_valid()
 
-        # Add the session/message middleware to the request
-        SessionMiddleware(self.dummy_get_response).process_request(request)
-        MessageMiddleware(self.dummy_get_response).process_request(request)
-        request.user = user
-
-        view.request = request
-
-        form = QuestionForm({'header':'Test question header', 'body':'Test question body'})
-        form.cleaned_data = []
-        view.form_valid(form)
-
-        messages_sent = [m.message for m in messages.get_messages(request)]
-        assert messages_sent == [self.msg_question_added]
+    def test_ask_request(self,client):
+        client.force_login(User.objects.get_or_create(username='user1')[0])
+        response = client.post("/ask", self.question, follow=True)
+        assert response.status_code == 200
 
 
 class TestAnswerView:
+    @classmethod
+    def setup_class(cls):
+        cls.question = {'header':'Test question header', 'body':'Test question body','pk':9}
+        cls.answer = {'body': "42"}
+        cls.answer_view = CreateAnswerView()
+        cls.answer_view.kwargs = {'pk': cls.question['pk']}        
+        cls.answer_form = AnswerForm(cls.answer)
 
     def dummy_get_response(self, request: HttpRequest):
         return None
 
 
     def test_valid_data(self, user: User, rf: RequestFactory):
-        view = CreateAnswerView()
+       
         request = rf.get("/fake-url/")
 
-        # Add the session/message middleware to the request
         SessionMiddleware(self.dummy_get_response).process_request(request)
         MessageMiddleware(self.dummy_get_response).process_request(request)
         request.user = user
 
-        view.request = request
-        view.kwargs = {'pk': 9}
-
-
-        form = AnswerForm({
-            'body': "42",
-        })
-        view.form_valid(form)
-        answer = form.save()
-        assert answer.body == "42"
-        assert answer.question.id == int(view.kwargs['pk'])
+        self.answer_view.request = request
+        
+        response = self.answer_view.form_valid(self.answer_form)
+        assert self.answer_form.is_valid()
+        answer = self.answer_form.save()
+        assert answer.body == self.answer["body"]
+        assert answer.question.id == int(self.answer_view.kwargs['pk'])
 
 class TestSearchView:
+
+    @classmethod
+    def setup_class(cls):
+        cls.body = "Test question body"
 
     def dummy_get_response(self, request: HttpRequest):
         return None
@@ -89,10 +86,14 @@ class TestSearchView:
         request = rf.get("/search/?q=test")
 
         response = SearchView.as_view()(request)
-        assert response.context_data['object_list'][0].body == "Test question body"
+        assert response.context_data['object_list'][0].body == self.body
 
 
 class TestVoteView:
+
+    @classmethod
+    def setup_class(cls):
+        cls.success = {'success':True,'rating':1}
 
     def dummy_get_response(self, request: HttpRequest):
         return None
@@ -102,9 +103,8 @@ class TestVoteView:
         view = AjaxVoteView()
         request = rf.post("/vote/", {'is_answ':0,'pk':9,'val':1,'unvote':'false','user':user.pk}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
 
-        # Add the session/message middleware to the request
         SessionMiddleware(self.dummy_get_response).process_request(request)
         MessageMiddleware(self.dummy_get_response).process_request(request)
         request.user = user
         response = AjaxVoteView.as_view()(request)
-        assert json.loads(str(response.content,encoding='utf-8')) == {'success':True,'rating':1}
+        assert json.loads(str(response.content,encoding='utf-8')) == self.success
