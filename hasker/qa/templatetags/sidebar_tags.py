@@ -6,7 +6,7 @@ from hasker.qa.models import Question,Answer
 
 register = template.Library()
 
-@register.inclusion_tag('qa/trending.html')
+@register.inclusion_tag('trending.html')
 def trending_tag():
     return {'trending': Question.objects.annotate(total_score=Coalesce(Sum('votequestion__value'),0))\
                             .annotate(is_accepted=Exists(Answer.objects.filter(question=OuterRef('pk'), is_accepted=True)))\

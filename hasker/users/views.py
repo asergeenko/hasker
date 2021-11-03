@@ -41,7 +41,7 @@ user_update_view = UserUpdateView.as_view()
 
 
 class AccountLogoutView(LoginRequiredMixin,LogoutView):
-    template_name = "account/logout.html"
+    template_name = "logout.html"
 
     def post(self, *args, **kwargs):
         if self.request.user.is_authenticated:
@@ -49,23 +49,13 @@ class AccountLogoutView(LoginRequiredMixin,LogoutView):
         return redirect('qa:home')
 
 class AccountLoginView(LoginView):
-    template_name = "account/login.html"
+    template_name = "login.html"
 
 class AccountSignupView(SuccessMessageMixin, CreateView):
-    template_name = "account/signup.html"
-    success_url = reverse_lazy('account_login')
+    template_name = "signup.html"
+    success_url = reverse_lazy('users:account_login')
     form_class = UserCreationForm
     success_message = "Your profile was created successfully"
 
 
 user_signup_view = AccountSignupView.as_view()
-
-class AccountResetPasswordView(LoginRequiredMixin,View):
-    template_name = "account/password_reset.html"
-
-    def get(self, *args, **kwargs):
-        return render(self.request, self.template_name)
-
-    def post(self, *args, **kwargs):
-        return redirect('qa:home')
-

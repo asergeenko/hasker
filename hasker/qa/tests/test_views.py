@@ -18,7 +18,7 @@ from hasker.qa.views import (
     AskView,
     CreateAnswerView,
     SearchView,
-    VoteView
+    AjaxVoteView
 )
 
 User = get_user_model()
@@ -26,6 +26,9 @@ User = get_user_model()
 pytestmark = pytest.mark.django_db
 
 class TestAskView:
+    @classmethod
+    def setup_class(cls):
+        cls.msg_question_added = "Your question was added successfully"
 
     def dummy_get_response(self, request: HttpRequest):
         return None
@@ -46,7 +49,7 @@ class TestAskView:
         view.form_valid(form)
 
         messages_sent = [m.message for m in messages.get_messages(request)]
-        assert messages_sent == ["Your question was added successfully"]
+        assert messages_sent == [self.msg_question_added]
 
 
 class TestAnswerView:
@@ -96,12 +99,12 @@ class TestVoteView:
 
 
     def test_vote(self, user: User, rf: RequestFactory):
-        view = VoteView()
+        view = AjaxVoteView()
         request = rf.post("/vote/", {'is_answ':0,'pk':9,'val':1,'unvote':'false','user':user.pk}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
 
         # Add the session/message middleware to the request
         SessionMiddleware(self.dummy_get_response).process_request(request)
         MessageMiddleware(self.dummy_get_response).process_request(request)
         request.user = user
-        response = VoteView.as_view()(request)
+        response = AjaxVoteView.as_view()(request)
         assert json.loads(str(response.content,encoding='utf-8')) == {'success':True,'rating':1}

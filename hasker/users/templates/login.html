@@ -1,4 +1,4 @@
-{% extends "account/base.html" %}
+{% extends "account_base.html" %}
 
 {% load crispy_forms_tags %}
 
@@ -8,11 +8,11 @@
 
 <h1>Sign In</h1>
 
-{% url 'account_signup' as signup_url %}
+{% url 'users:account_signup' as signup_url %}
 <p>If you have not created an account yet, then please
 <a href="{{ signup_url }}">sign up</a> first.</p>
 
-<form class="login" method="POST" action="{% url 'account_login' %}">
+<form class="login" method="POST" action="{% url 'users:account_login' %}">
   {% csrf_token %}
   {{ form|crispy }}
   {% if redirect_field_value %}

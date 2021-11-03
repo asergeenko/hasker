@@ -16,14 +16,15 @@ from django.http import JsonResponse
 from django.db.models.functions import Coalesce
 
 from hasker.qa.forms import QuestionForm,AnswerForm
-from hasker.qa.models import Question,Answer,VoteAnswer,VoteQuestion,vote, accept_answer, get_questions_with_stats
+from hasker.qa.models import Question,Answer,VoteAnswer,VoteQuestion
+from hasker.qa.functions import vote, accept_answer, get_questions_with_stats
 
 
 logger = logging.getLogger(__name__)
 
 
 class SearchView(ListView):
-    template_name = 'qa/search_results.html'
+    template_name = 'search_results.html'
     model = Question
     paginate_by = 20
 
@@ -49,7 +50,7 @@ class SearchView(ListView):
         return context
 
 class AskView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
-    template_name = "qa/ask_form.html"
+    template_name = "ask_form.html"
     form_class = QuestionForm
     success_message = "Your question was added successfully"
 
@@ -61,7 +62,7 @@ class AskView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return reverse_lazy('qa:question',args=(self.object.id,))
 
 class CreateAnswerView(FormMixin, ListView, LoginRequiredMixin, SuccessMessageMixin):
-    template_name = 'qa/create_answer_form.html'
+    template_name = 'create_answer_form.html'
     paginate_by = 30
     form_class = AnswerForm
 
@@ -120,11 +121,10 @@ class CreateAnswerView(FormMixin, ListView, LoginRequiredMixin, SuccessMessageMi
             return self.form_invalid(form)
 
 
-class VoteView(LoginRequiredMixin, View):
+class AjaxVoteView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         if self.request.is_ajax():
-
             pk = self.request.POST.get('pk')
             params = {}
             params['post_id'] = pk
@@ -137,11 +137,10 @@ class VoteView(LoginRequiredMixin, View):
 
             return JsonResponse({'success':result,'rating':rating})
 
-class AcceptAnswerView(LoginRequiredMixin, View):
+class AjaxAcceptAnswerView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         if self.request.is_ajax():
-
             pk = self.request.POST.get('pk')
             is_accept = int(self.request.POST.get('is_accept'))
 
@@ -150,7 +149,7 @@ class AcceptAnswerView(LoginRequiredMixin, View):
             return JsonResponse({'success':result})
 
 class TopQuestionsView(ListView):
-    template_name = 'qa/top_questions.html'
+    template_name = 'top_questions.html'
     model = Question
     paginate_by = 20
 
