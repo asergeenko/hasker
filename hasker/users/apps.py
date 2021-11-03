@@ -6,7 +6,4 @@ class UsersConfig(AppConfig):
     verbose_name = "Users"
 
     def ready(self):
-        try:
-            import hasker.users.signals  # noqa F401
-        except ImportError:
-            pass
+        import hasker.users.signals  # noqa F401

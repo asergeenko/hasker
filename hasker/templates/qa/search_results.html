@@ -3,8 +3,8 @@
 
 {% block content %}
     <h3>Search results</h3>
-    {% if object_list %}
-    	{% for question in object_list %}
+    {% if page_obj.object_list %}
+    	{% for question in page_obj.object_list %}
         	{% include "qa/question_teaser.html" with question=question %}
     
         {% endfor %}

@@ -7,9 +7,7 @@ from django.urls import reverse
 class User(AbstractUser):
     """Default user for Hasker."""
 
-    #: First and last name do not cover name patterns around the globe
     date_joined = models.DateTimeField(auto_now_add=True)
-    email = models.EmailField()
     avatar = models.ImageField(default='avatars/default.jpg', upload_to='avatars/')
 
 

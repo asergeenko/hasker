@@ -42,16 +42,10 @@ class SearchView(ListView):
         context = super().get_context_data(**kwargs)
         paginator = Paginator(self.results, self.paginate_by)
 
-        page = self.request.GET.get('page')
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
-        try:
-            object_list = paginator.page(page)
-        except PageNotAnInteger:
-            object_list = paginator.page(1)
-        except EmptyPage:
-            object_list = paginator.page(paginator.num_pages)
-
-        context['object_list'] = object_list
+        context['page_obj'] = page_obj
         return context
 
 class AskView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
@@ -180,15 +174,9 @@ class TopQuestionsView(ListView):
 
         paginator = Paginator(self.results, self.paginate_by)
 
-        page = self.request.GET.get('page')
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
-        try:
-            questions = paginator.page(page)
-        except PageNotAnInteger:
-            questions = paginator.page(1)
-        except EmptyPage:
-            questions = paginator.page(paginator.num_pages)
-
-        context['questions'] = questions
         context['hot'] = self.hot
+        context['page_obj'] = page_obj
         return context
